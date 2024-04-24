@@ -6,6 +6,8 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'model.dart';
+import 'AddWidget.dart';
+
 
 void main() {
   runApp(const MyApp());
@@ -35,7 +37,7 @@ class TaskListPage extends StatefulWidget {
 }
 
 class _TaskListPageState extends State<TaskListPage> {
-  late List<Task> tasks;
+  static List<Task> tasks = [];
   TextEditingController textEditingController = TextEditingController();
   TextEditingController textEditingControllerDate = TextEditingController();
   var formatter = DateFormat('dd-MM-yyyy');
@@ -107,55 +109,16 @@ class _TaskListPageState extends State<TaskListPage> {
             padding: const EdgeInsets.all(8.0),
             child: Row(
               children: [
-                Expanded(
-                  child: TextField(
-                    controller: textEditingController,
-                    decoration: const InputDecoration(
-                        hintText: 'Задача'),
-                  ),
-                ),
-                DateFormatField(
-                  type: DateFormatType.type4,
-                  addCalendar: true,
-                  controller: textEditingControllerDate,
-                  decoration: InputDecoration(
-                    // errorText: _validate ? "Неккоректный ввод" : null,
-                    hintText: 'Дата',
-                    hintStyle: const TextStyle(fontWeight: FontWeight.bold),
-                    border: const OutlineInputBorder(),
-                    suffixIcon: IconButton(
-                        onPressed: _cleartext, icon: const Icon(Icons.clear)),
-                  ), onComplete: (date) {
-                  setState(() {
-                    selectedDate = DateUtils.dateOnly(date!);
-                  });
-                  textEditingControllerDate.text=formatter.format(selectedDate);
-                },
-                ),
-                Expanded(
-                  child: TextField(
-                    controller: textEditingController,
-                    decoration: const InputDecoration(
-                        hintText: 'Приоритет'),
-                  ),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    if (textEditingController.text.isNotEmpty) {
-                      final newTask = Task(
-                        text: textEditingController.text,
-                        date: DateTime.now(),
-                        priority: 1,
-                      );
-                      setState(() {
-                        tasks.add(newTask);
-                        saveTasks();
-                        textEditingController.clear();
-                      });
-                    }
-                  },
-                  child: const Text('Добавить'),
-                ),
+
+                FloatingActionButton(
+                child: Icon(Icons.add),
+                onPressed: () {
+                  showModalBottomSheet(
+                    isScrollControlled: true,
+                    context: context,
+                    builder: (_) => wd
+                  );
+                }),
               ],
             ),
           ),
@@ -163,6 +126,17 @@ class _TaskListPageState extends State<TaskListPage> {
       ),
     );
   }
+
+
+  Widget get wd =>
+      AddWidget(
+    add: (Task task){
+      setState(() {
+        tasks.add(task);
+      });
+    },
+    isChange: false,
+  );
 
   Widget get task =>
       Expanded(
@@ -196,8 +170,25 @@ class _TaskListPageState extends State<TaskListPage> {
                   saveTasks();
                 });
               },
+              onChange: (){
+                setState(() {
+                  showModalBottomSheet(
+                      context: context,
+                      builder: (_) => AddWidget(
+                        add: (Task task){
+                          setState(() {
+                            tasks[index] = task;
+                          });
+                        },
+                        isChange: true,
+                        task: tasks[index],
+                      )
+                  );
+                });
+              },
             );
           },
         ),
       );
+
 }

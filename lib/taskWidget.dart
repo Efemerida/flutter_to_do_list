@@ -9,6 +9,7 @@ class TaskWidget extends StatelessWidget {
 
   final Task task;
   final Function() onDelete;
+  final Function() onChange;
   final Function(String) onPriorityChange;
   final Function() onToggleCompletion;
   final Function(String) onChangeText;
@@ -20,6 +21,7 @@ class TaskWidget extends StatelessWidget {
     required this.onPriorityChange,
     required this.onToggleCompletion,
     required this.onChangeText,
+    required this.onChange,
   }) : super(key: key);
 
   @override
@@ -30,21 +32,31 @@ class TaskWidget extends StatelessWidget {
           height: 100,
           child: Row(
             children: [
+              Icon(Icons.star),
+              Expanded(
+                child: TextField(
+                  keyboardType: TextInputType.number,
+                  onSubmitted:  onPriorityChange,
+                  decoration:
+                  const InputDecoration.collapsed(hintText: '0'),
+                  controller: TextEditingController(text: task.priority.toString()),
+                ),
+              ),
+              Container(child:
+                Text(
+                    '${task.date.day}/${task.date.month}/${task.date.year}'),
+              ),
               Checkbox(
                 value: task.isCompleted,
                 onChanged: (value) => onToggleCompletion(),
               ),
-              Expanded(
-                child: TextField(
-                  onSubmitted:  onChangeText,
-                  decoration:
-                  const InputDecoration.collapsed(hintText: 'Enter task'),
-                  controller: TextEditingController(text: task.text),
-                ),
-              ),
               IconButton(
                 icon: const Icon(Icons.delete),
                 onPressed: onDelete,
+              ),
+              IconButton(
+                icon: const Icon(Icons.cached),
+                onPressed: onChange,
               ),
             ],
           ),
@@ -55,30 +67,15 @@ class TaskWidget extends StatelessWidget {
             verticalDirection: VerticalDirection.up,
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              Column(children: <Widget>[
-                Text(
-                    '${task.date.day}/${task.date.month}/${task.date.year} ${task.date.hour}:${task.date.minute}'),
-                Text('${task.date.hour}:${task.date.minute}'),
-              ]),
-              const SizedBox(width: 40),
-              Text("Приоритет: "),
               Expanded(
                 child: TextField(
-                  keyboardType: TextInputType.number,
-                  onSubmitted:  onPriorityChange,
+                  onSubmitted:  onChangeText,
                   decoration:
-                  const InputDecoration.collapsed(hintText: '0'),
-                  controller: TextEditingController(text: task.priority.toString()),
+                  const InputDecoration.collapsed(hintText: 'Enter task'),
+                  controller: TextEditingController(text: task.text),
                 ),
               ),
-              // for (int i = 1; i <= 5; i++)
-              //   IconButton(
-              //     icon: Icon(
-              //       i <= task.priority ? Icons.star : Icons.star_border,
-              //       color: Colors.orange,
-              //     ),
-              //     onPressed: () => onPriorityChange(i),
-              //   ),
+
             ],
           ),
         ),
